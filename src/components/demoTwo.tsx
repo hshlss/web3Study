@@ -4,12 +4,15 @@ import { default as Abi } from './web3/abi/box.json';
 import type { AbiItem } from 'web3-utils';
 import React, { useState } from 'react';
 import Web3 from 'web3';
-import { Button } from '@mui/material';
+import { Button, InputAdornment, TextField } from '@mui/material';
+import { fromWei, toWei } from '@/utils';
 
 export type IDemoTwoProps = {};
 
 const demoTwo: React.FC<IDemoTwoProps> = ({}) => {
   const [tokenBalance, setTokenBalance] = useState('');
+  const [address, setAddress] = useState<string>('');
+  const [token, setToken] = useState('');
   const [name, setName] = useState<string>('');
   const [symbol, setSymbol] = useState<string>('');
   const web3 = new Web3(Web3.givenProvider);
@@ -31,19 +34,30 @@ const demoTwo: React.FC<IDemoTwoProps> = ({}) => {
   );
   const getToken = async () => {
     const token = await contract.methods.balanceOf(account).call();
-    setTokenBalance(token);
+    const decimals = await contract.methods.decimals().call();
+    setTokenBalance(fromWei(token, decimals).toString());
   };
   const getName = async () => {
     const _name = await contract.methods.name().call();
     setName(_name);
     // debugger;
-    // console.log(_name);
-    // alert(_name);
   };
 
   const getSymbolName = async () => {
     const symbolName = await contract.methods.symbol().call();
     setSymbol(symbolName);
+  };
+
+  const transfer = async () => {
+    try {
+      const decimals = await contract.methods.decimals().call();
+      const res = await contract.methods
+        .transfer(address, toWei(token, decimals))
+        .send({ from: account });
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
   };
   return (
     <div>
@@ -63,6 +77,31 @@ const demoTwo: React.FC<IDemoTwoProps> = ({}) => {
         获取ERC20的Token余额
       </Button>
       &nbsp;&nbsp;&nbsp;&nbsp;<b>{tokenBalance}</b>
+      <br />
+      <br />
+      <TextField
+        id="address"
+        label="address"
+        variant="outlined"
+        onChange={(e) => {
+          setAddress(e.target.value);
+        }}
+      />
+      <TextField
+        id="Token"
+        label="Token"
+        type="number"
+        InputProps={{
+          startAdornment: <InputAdornment position="start">wei</InputAdornment>,
+        }}
+        onChange={(e) => {
+          setToken(e.target.value);
+        }}
+      />
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <Button variant="contained" onClick={transfer}>
+        Transfer
+      </Button>
     </div>
   );
 };
