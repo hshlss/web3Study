@@ -1,4 +1,5 @@
 import DemoOne from '@/components/demoOne';
+import DemoTwo from '@/components/demoTwo';
 import { TabContext, TabList, TabPanel } from '@material-ui/lab';
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
@@ -16,7 +17,7 @@ const index: React.FC<IndexProps> = ({}) => {
     <TabContext value={value}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <TabList onChange={handleChange} aria-label="lab API tabs example">
-          <Tab label="Item One" value="1" />
+          <Tab label="Metamask" value="1" />
           <Tab label="Item Two" value="2" />
           <Tab label="Item Three" value="3" />
         </TabList>
@@ -24,7 +25,9 @@ const index: React.FC<IndexProps> = ({}) => {
       <TabPanel value="1">
         <DemoOne />
       </TabPanel>
-      <TabPanel value="2">Item Two</TabPanel>
+      <TabPanel value="2">
+        <DemoTwo />
+      </TabPanel>
       <TabPanel value="3">Item Three</TabPanel>
     </TabContext>
   );
