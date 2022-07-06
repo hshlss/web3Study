@@ -13,8 +13,15 @@ const demoTwo: React.FC<IDemoTwoProps> = ({}) => {
   const [tokenBalance, setTokenBalance] = useState('');
   const [address, setAddress] = useState<string>('');
   const [token, setToken] = useState('');
+  const [allowanceToken, setAllowanceToken] = useState('');
   const [name, setName] = useState<string>('');
   const [symbol, setSymbol] = useState<string>('');
+  const [spenderAddress, setSpenderAddress] = useState<string>('');
+  const [uintTokens, setUintTokens] = useState('');
+  const [allowanceAddress, setAllowanceAddress] = useState<string>('');
+  const [fromAddress, setFromAddress] = useState<string>('');
+  const [toAddress, setToAddress] = useState<string>('');
+  const [valueTokens, setValueTokens] = useState('');
   const web3 = new Web3(Web3.givenProvider);
   const context = useWeb3React<Web3Provider>();
   const {
@@ -48,15 +55,58 @@ const demoTwo: React.FC<IDemoTwoProps> = ({}) => {
     setSymbol(symbolName);
   };
 
+  const allowance = async () => {
+    const decimals = await contract.methods.decimals().call();
+    const tokenOwner = await contract.methods
+      .allowance(account, allowanceAddress)
+      .call();
+    setAllowanceToken(fromWei(tokenOwner, decimals).toString());
+  };
+
+  const approve = async () => {
+    try {
+      const decimals = await contract.methods.decimals().call();
+      const res = await contract.methods
+        .approve(spenderAddress, toWei(uintTokens, decimals))
+        .send({ from: account });
+      if (res.status) {
+        alert('授权成功!');
+      }
+    } catch (error) {
+      if (error) {
+        alert('授权失败，请重新填写');
+      }
+    }
+  };
+
+  const transferForm = async () => {
+    try {
+      const decimals = await contract.methods.decimals().call();
+      console.log(fromAddress, '---', toAddress);
+      console.log(account);
+
+      const res = await contract.methods
+        .transferFrom(fromAddress, toAddress, toWei(valueTokens, decimals))
+        .send({ from: account });
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const transfer = async () => {
     try {
       const decimals = await contract.methods.decimals().call();
       const res = await contract.methods
         .transfer(address, toWei(token, decimals))
         .send({ from: account });
-      console.log(res);
+      if (res.status) {
+        alert('交易成功!');
+      }
     } catch (error) {
-      console.log(error);
+      if (error) {
+        alert('请重新填写');
+      }
     }
   };
   return (
@@ -101,6 +151,80 @@ const demoTwo: React.FC<IDemoTwoProps> = ({}) => {
       &nbsp;&nbsp;&nbsp;&nbsp;
       <Button variant="contained" onClick={transfer}>
         Transfer
+      </Button>
+      <br />
+      <br />
+      <TextField
+        id="spenderAddress"
+        label="spenderAddress"
+        variant="outlined"
+        onChange={(e) => {
+          setSpenderAddress(e.target.value);
+        }}
+      />
+      <TextField
+        id="uintTokens"
+        label="uintTokens"
+        type="number"
+        InputProps={{
+          startAdornment: <InputAdornment position="start">wei</InputAdornment>,
+        }}
+        onChange={(e) => {
+          setUintTokens(e.target.value);
+        }}
+      />
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <Button variant="contained" onClick={approve}>
+        approve
+      </Button>
+      <br />
+      <br />
+      <TextField
+        id="allowanceAddress"
+        label="allowanceAddress"
+        variant="outlined"
+        onChange={(e) => {
+          setAllowanceAddress(e.target.value);
+        }}
+      />
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <Button variant="contained" onClick={allowance}>
+        allowance
+      </Button>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <b>{allowanceToken}</b>
+      <br />
+      <br />
+      <TextField
+        id="fromAddress"
+        label="fromAddress"
+        variant="outlined"
+        onChange={(e) => {
+          setFromAddress(e.target.value);
+        }}
+      />
+      <TextField
+        id="toAddress"
+        label="toAddress"
+        variant="outlined"
+        onChange={(e) => {
+          setToAddress(e.target.value);
+        }}
+      />
+      <TextField
+        id="valueTokens"
+        label="valueTokens"
+        type="number"
+        InputProps={{
+          startAdornment: <InputAdornment position="start">wei</InputAdornment>,
+        }}
+        onChange={(e) => {
+          setValueTokens(e.target.value);
+        }}
+      />
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <Button variant="contained" onClick={transferForm}>
+        transferForm
       </Button>
     </div>
   );
